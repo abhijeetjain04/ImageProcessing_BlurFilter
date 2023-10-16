@@ -1,93 +1,119 @@
 #include "FileOperations.h"
+#include <fstream>
+#include <string>
+#include <string_view>
 
-void FileOperations::FileOperations::checkFilepath(std::string& filepath)
+bool FileOperations::FileOperations::DoesFileExist(std::string_view filepath)
 {
-  
+    return std::filesystem::exists(filepath.data());
 }
 
-bool FileOperations::FileOperations::DoesFileExist(std::string& filepath)
-{
-    return std::filesystem::exists(filepath);
-}
-
-bool FileOperations::FileOperations::IsValidFilePath(std::string& filepath, std::string& errorMessage)
+bool FileOperations::FileOperations::IsValidFilePath(std::string& filepath)
 {
     if (DoesFileExist(filepath))
     {
         std::replace(filepath.begin(), filepath.end(), '\\', '/');
-        errorMessage.clear();
         return true;
     }
-
-    errorMessage = "Invalid input. Please enter the correct path again.";
     filepath.clear();
     return false;
 }
 
-bool FileOperations::FileOperations::IsTGAFile(std::string& filepath, std::string& errorMessage)
+bool FileOperations::FileOperations::IsValidFolderPath(std::string& folderepath)
 {
-    if (std::filesystem::path(filepath).extension() == ".tga")
+    if (std::filesystem::is_directory(folderepath))
+    {
+        std::replace(folderepath.begin(), folderepath.end(), '\\', '/');
+        return true;
+    }
+    return false;
+}
+
+bool FileOperations::FileOperations::IsTGAFile(std::string_view filepath)
+{
+    if (std::filesystem::path(filepath.data()).extension() == ".tga")
     {
         return true;
     }
-    else
-    {
-        errorMessage = "File is not tga.Please enter the tga file path again.";
-        return false;
-    }
+    return false;
 }
 
-void FileOperations::FileOperations::GetCompleteFilename(const std::string& filepath, std::string& completeFilename)
+
+
+std::string FileOperations::FileOperations::GetCompleteFilename(const std::string& filepath)
 {
-    completeFilename = std::filesystem::path(filepath).filename().string();
+    return std::filesystem::path(filepath).filename().string();
 }
 
-void FileOperations::FileOperations::GetDirectoryPath(const std::string& filepath, std::string& directoryPath)
+std::string FileOperations::FileOperations::GetDirectoryPath(const std::string& filepath)
 {
-    directoryPath = std::filesystem::path(filepath).parent_path().string();
+    return std::filesystem::path(filepath).parent_path().string();
 }
 
-std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::ReadTGAFile(const std::string& filename, std::vector<uint8_t>& image, TGAHeader& header)
+std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::ReadTGAFile(std::string_view filename, std::vector<uint8_t>& image, TGAHeader& header)
 {
     std::string error;
-    std::ifstream file(filename, std::ios::binary);
+    std::ifstream file(filename.data(), std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-        error =  "Failed to open file: ";
+        error =  "Failed to open file.";
         return { error, false };
     }
 
     file.read(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
 
-
     if (header.image_type != 2) {
-        // we may need to support Uncompressed Color-Mapped Image (Color-Indexed Image):
-        //Uncompressed Black-and-White (Grayscale) Image:
-        error = "Unsupported TGA image type: ";
+        error = "Unsupported TGA image type.";
         return { error, false };
     }
 
-    ////`width * height`: This represents the total number of pixels in the image.
-    //auto total_pixels = header.width * header.height;
-    ////`pixel_depth / 8`: This converts the pixel depth(measured in bits per pixel) into bytes.
-    //auto size_byte = header.pixel_depth / 8;
-    //auto final_size = header.width * header.height * (header.pixel_depth / 8);
-    //image.resize(header.width * header.height * (header.pixel_depth / 8));
+    image.resize(header.width * header.height * (header.pixel_depth / 8));
     file.read(reinterpret_cast<char*>(image.data()), image.size());
-
+    file.close();
     return { " ", true};
 }
 
-std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::WriteTGAFile(const std::string& filename, const std::vector<uint8_t>& image, const TGAHeader& header)
+std::string FileOperations::TGAFileOperation::MakeUniqueFilename(const std::string& filename,const std::string& outputFileDir)
+{
+    // Check if the file already exists
+    std::string originalPath = outputFileDir + "Blur_" + GetCompleteFilename(filename);
+
+    if (!std::filesystem::exists(originalPath)) {
+        return originalPath;  // The original filename is unique
+    }
+
+    std::filesystem::path directory = std::filesystem::path(originalPath).parent_path();
+    std::string filenameStem = std::filesystem::path(originalPath).stem().string();
+    std::string extension = std::filesystem::path(originalPath).extension().string();
+    int count = 1;
+
+    while (std::filesystem::exists(originalPath)) {
+        std::string newFilename = filenameStem + "_" + std::to_string(count) + extension;
+        originalPath = (directory / newFilename).string();
+        count++;
+    }
+
+    // Replace backslashes with forward slashes for portability
+    std::replace(originalPath.begin(), originalPath.end(), '\\', '/');
+    return originalPath;
+}
+
+std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::WriteTGAFile(std::string_view filename, std::string_view outputFileDir,
+    const std::vector<uint8_t>& image, const TGAHeader& header, std::string& outputFileName)
 {
     std::string error;
-    std::ofstream file(filename, std::ios::binary);
-    if (!file) {
-       error = "Failed to create file: ";
+    outputFileName = MakeUniqueFilename(filename.data(), outputFileDir.data());
+
+    std::ofstream file(outputFileName, std::ios::out | std::ios::binary);
+    if (!file.is_open()) {
+       error = "Failed to create file.";
        return { error, false };
     }
 
     file.write(reinterpret_cast<const char*>(&header), sizeof(TGAHeader));
     file.write(reinterpret_cast<const char*>(image.data()), image.size());
-
+    file.close();
     return { " ",true };
 }
+
+
+

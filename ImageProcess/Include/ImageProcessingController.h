@@ -23,8 +23,8 @@ namespace Controller
         void PrintFinalMessage();
         void QuitApplication();
 
-        void BlurTGAImage();
-        
+        void ProcessTGAImage();
+        void BlurTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor);
         View::ImageProcessingView* m_pUI;
         Model::ImageProcessingModel* m_pModel;
         FileOperations::FileOperations m_FileOper;

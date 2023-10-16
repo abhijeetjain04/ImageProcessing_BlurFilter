@@ -114,9 +114,11 @@ void applyBlur(std::vector<uint8_t>& image, int width, int height, float blurFac
 
 */
 
+# define M_PI  3.14159265358979323846 
 
 // Apply Gaussian blur to a 32-bit TGA image
-void ApplyGaussianBlur(std::vector<uint8_t>& image, int width, int height, int radius) {
+void ApplyGaussianBlur(std::vector<uint8_t>& image, int width, int height, int radius)
+{
 
     // Calculate the Gaussian kernel values
     int kernelSize = 2 * radius + 1;
@@ -194,6 +196,7 @@ void ApplyGaussianBlur(std::vector<uint8_t>& image, int width, int height, int r
 //    return false;
 //}
 
+/*
 void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)
 {
     //Applying simple box blur
@@ -293,4 +296,77 @@ void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int wid
 
     }
 
+}
+*/
+
+void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)
+{
+    //Applying simple box blur
+    if (blurFactor <= 0.0) {
+        return;  // No blur
+    }
+
+    // 1. Calculate the size of the blur based on the blur factor
+    int blurSize = static_cast<int>(std::round(10.0 * blurFactor));
+
+    // Example code for applying blur to a 24-bit image
+    int channelCount = pixelDepth / 8;
+   // Apply blur effect to a 24-bit image
+       // 2. Loop through each pixel in the image
+   for (int y = 0; y < height; y++) 
+   {
+       for (int x = 0; x < width; x++) 
+       {
+           // 3. Initialize accumulators for each color channel and the count of pixels
+           int redSum = 0;
+           int greenSum = 0;
+           int blueSum = 0;
+           int alphaSum = 0;
+           int numPixels = 0;
+           int pixelX =0;
+           int pixelY=0;
+
+           // 4. Iterate through a neighborhood of pixels centered around the current pixel
+           for (int dy = -blurSize; dy <= blurSize; dy++)
+           {
+               for (int dx = -blurSize; dx <= blurSize; dx++) 
+               {
+                   // 5. Calculate the X and Y coordinates of the neighboring pixel
+                    pixelX = x + dx;
+                    pixelY = y + dy;
+
+                   // 6. Check if the neighboring pixel is within the image boundaries
+                   if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) 
+                   {
+                      // 7. Calculate the index of the neighboring pixel in the image vector
+                      int index = (pixelY * width + pixelX) * channelCount;
+
+                      // 8. Accumulate the color channel values for the neighboring pixel
+                      redSum += image[index];
+                      greenSum += image[index + 1];
+                      blueSum += image[index + 2];
+                      if (channelCount == 4)
+                      {
+                       alphaSum += image[index + 3];
+                      }
+                      // 9. Increment the count of pixels in the neighborhoo
+                      numPixels++;
+                   }
+               }
+           }
+           // 10. Calculate the new color values for the current pixel based on the average
+           int pixelIndex = (y * width + x) * channelCount;
+
+           // Update the pixel with the averaged color values
+           if (numPixels > 0) {
+               image[pixelIndex] = static_cast<uint8_t>(redSum / numPixels);
+               image[pixelIndex + 1] = static_cast<uint8_t>(greenSum / numPixels);
+               image[pixelIndex + 2] = static_cast<uint8_t>(blueSum / numPixels);
+               if (channelCount == 4)
+               {
+                  image[pixelIndex + 3] = static_cast<uint8_t>(alphaSum / numPixels);
+               }
+           }
+       }
+   }
 }
