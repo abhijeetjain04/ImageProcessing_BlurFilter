@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\LogSystem.cpp" />
     <ClCompile Include="Source\FileOperations.cpp" />
     <ClCompile Include="Source\ImageProcessingModel.cpp" />
     <ClCompile Include="Source\ImageProcessingView.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="Include\ImageProcessingModel.h" />
     <ClInclude Include="Include\ImageProcessingView.h" />
     <ClInclude Include="Include\ImageProcessingController.h" />
+    <ClInclude Include="Include\LogSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -17,6 +17,7 @@ bool FileOperations::FileOperations::IsValidFilePath(std::string& filepath)
 {
     if (DoesFileExist(filepath))
     {
+        m_LogObj->LogMessage(Log::LogLevel::INFO, "Valid path found");
         std::replace(filepath.begin(), filepath.end(), '\\', '/');
         return true;
     }
@@ -55,6 +56,7 @@ std::string FileOperations::FileOperations::GetDirectoryPath(const std::string& 
 
 std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::ReadTGAFile(std::string_view filename, std::vector<uint8_t>& image, TGAHeader& header)
 {
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Reading TGA file.");
     std::string ReadError;
     std::ifstream File(filename.data(), std::ios::in | std::ios::binary);
     if (!File.is_open()) {

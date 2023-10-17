@@ -1,4 +1,5 @@
 #pragma once
+#include "LogSystem.h"
 #include <filesystem>
 #include <optional>
 #include <utility>
@@ -26,6 +27,7 @@ namespace FileOperations
 	class FileOperations
 	{
 	public:
+		FileOperations(Log::LogSystem* logobj) :m_LogObj(logobj) {}
 		void SanitizePath(std::string& filepath);
 		bool DoesFileExist(std::string_view filepath);
 		bool IsValidFilePath(std::string& filepath);
@@ -33,16 +35,20 @@ namespace FileOperations
 		bool IsTGAFile(std::string_view filepath);
 		std::string GetFilenameWithExtension(const std::string& filepath);
 		std::string GetDirectoryPath(const std::string& filepath);
+	private:
+		Log::LogSystem* m_LogObj;
 	};
 
 	class TGAFileOperation:public FileOperations
 	{
 	public:
+		TGAFileOperation(Log::LogSystem* logobj) :m_LogObj(logobj), FileOperations(m_LogObj){}
 		std::pair<std::optional<std::string>, bool> ReadTGAFile(std::string_view filename, std::vector<uint8_t>& image, TGAHeader& header);
 		std::pair<std::optional<std::string>, bool> WriteTGAFile(std::string_view filename, std::string_view outputFileDir, const std::vector<uint8_t>& image,
 			const TGAHeader& header, std::string& outputFileName);
 	private:
 		std::string MakeUniqueFilename(const std::string& filePath,const std::string& outputFileDir);
 		std::string m_OutPutDir;
+		Log::LogSystem* m_LogObj;
 	};
 }

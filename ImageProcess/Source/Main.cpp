@@ -1,17 +1,18 @@
 #include "ImageProcessingController.h"
+#include "LogSystem.h"
 
 int main(int, const char* [])
 {
-	Model::ImageProcessingModel Model;
 	View::ImageProcessingView UI;
+	Log::LogSystem LogObj(&UI,"App.log");
+	Model::ImageProcessingModel Model(&LogObj);
 
 	//Create controller object 
-	Controller::ImageProcessingController controller(&UI, &Model);
+	Controller::ImageProcessingController Controller(&UI, &Model, &LogObj);
 
 	// Run the application using start application function 
-	while (controller.StartApplication() == false)
+	while (Controller.StartApplication() == false)
 	{
-
 	}
 
 	return 0;

@@ -25,7 +25,10 @@ bool Controller::ImageProcessingController::StartApplication()
         break;
     }
 
-    PrintFinalMessage();
+    if (!quit)
+    {
+        PrintFinalMessage();
+    }
     return quit;
 }
 
@@ -45,11 +48,12 @@ void Controller::ImageProcessingController::PrintFinalMessage()
 
 void Controller::ImageProcessingController::QuitApplication()
 {
-    exit(3);
+    m_pUI->PrintOnScreen("Quitting.....");
 }
 
 void Controller::ImageProcessingController::ProcessTGAImage()
 {
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Process TGA Image");
     std::string InputFilePath, OutputFileDirectory;
     float BlurFactor = 0.0;
     bool ValidInput = false;
@@ -108,7 +112,7 @@ void Controller::ImageProcessingController::ProcessTGAImage()
 
 void Controller::ImageProcessingController::BlurTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor)
 {
-    FileOperations::TGAFileOperation TGAFileOper;
+    FileOperations::TGAFileOperation TGAFileOper(m_LogObj);
     FileOperations::TGAHeader TGAHeader;
     std::string OutputFileName;
     std::vector<uint8_t> OriginalTGAImage;
