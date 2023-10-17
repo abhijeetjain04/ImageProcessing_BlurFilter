@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-
 #include <vector>
 #include <cstdint>
 #include <cmath>
@@ -11,8 +10,6 @@ namespace Model
     {
        public:
            void ApplyBlur(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor);
-    private:
-        void 
     };
 }
 

@@ -41,9 +41,6 @@ bool writeTGA(const std::string& filename, const std::vector<uint8_t>& image, co
 
     return true;
 }
-*/
-
-/*
 
 void applyBlur(std::vector<uint8_t>& image, int width, int height, float blurFactor) {
     if (blurFactor <= 0.0) {
@@ -113,88 +110,6 @@ void applyBlur(std::vector<uint8_t>& image, int width, int height, float blurFac
 }
 
 */
-
-# define M_PI  3.14159265358979323846 
-
-// Apply Gaussian blur to a 32-bit TGA image
-void ApplyGaussianBlur(std::vector<uint8_t>& image, int width, int height, int radius)
-{
-
-    // Calculate the Gaussian kernel values
-    int kernelSize = 2 * radius + 1;
-    std::vector<std::vector<double>> kernel(kernelSize, std::vector<double>(kernelSize, 0.0));
-    double sigma = radius / 2.0;
-    double sigmaSquared = 2 * sigma * sigma;
-
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
-            double exponent = -(x * x + y * y) / sigmaSquared;
-            kernel[y + radius][x + radius] = std::exp(exponent) / (2.0 * M_PI * sigmaSquared);
-        }
-    }
-
-    // Temporary vector to store the blurred image
-    int channelCount = 4; // 32-bit TGA image (RGBA)
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            double redSum = 0.0;
-            double greenSum = 0.0;
-            double blueSum = 0.0;
-            double alphaSum = 0.0;
-            double weightSum = 0.0;
-
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dx = -radius; dx <= radius; dx++) {
-                    int pixelX = x + dx;
-                    int pixelY = y + dy;
-
-                    if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) {
-                        int index = ((pixelY * width + pixelX) * channelCount);
-
-                        double weight = kernel[dy + radius][dx + radius];
-                        redSum += image[index] * weight;
-                        greenSum += image[index + 1] * weight;
-                        blueSum += image[index + 2] * weight;
-                        alphaSum += image[index + 3] * weight;
-                        weightSum += weight;
-                    }
-                }
-            }
-
-            int pixelIndex = (y * width + x) * channelCount;
-
-            if (weightSum > 0.0) {
-                image[pixelIndex] = static_cast<uint8_t>(redSum / weightSum);
-                image[pixelIndex + 1] = static_cast<uint8_t>(greenSum / weightSum);
-                image[pixelIndex + 2] = static_cast<uint8_t>(blueSum / weightSum);
-                image[pixelIndex + 3] = static_cast<uint8_t>(alphaSum / weightSum);
-            }
-        }
-    }
-
-
-}
-
-//bool processTGAImage(const std::string& inputFileName, const std::string& outputFileName, float blurFactor) {
-//     Model::TGAHeader header;
-//    std::vector<uint8_t> image;
-//
-//    if (readTGA(inputFileName, image, header)) {
-//        int width = header.width;
-//        int height = header.height;
-//        int pixel_depth = header.pixel_depth;
-//        //applyBlur(image, width, height, pixel_depth, blurFactor);
-//        ApplyGaussianBlur(image, header.width, header.height, 5);
-//
-//        if (writeTGA(outputFileName, image, header)) {
-//            std::cout << "Blurred image saved to " << outputFileName << std::endl;
-//            return true;
-//        }
-//    }
-//
-//    return false;
-//}
 
 /*
 void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)
@@ -307,10 +222,10 @@ void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int wid
     }
 
     // 1. Calculate the size of the blur based on the blur factor
-    int blurSize = static_cast<int>(std::round(10.0 * blurFactor));
+    int BlurSize = static_cast<int>(std::round(10.0 * blurFactor));
 
     // Example code for applying blur to a 24-bit image
-    int channelCount = pixelDepth / 8;
+    int ChannelCount = pixelDepth / 8;
    // Apply blur effect to a 24-bit image
        // 2. Loop through each pixel in the image
    for (int y = 0; y < height; y++) 
@@ -318,55 +233,57 @@ void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int wid
        for (int x = 0; x < width; x++) 
        {
            // 3. Initialize accumulators for each color channel and the count of pixels
-           int redSum = 0;
-           int greenSum = 0;
-           int blueSum = 0;
-           int alphaSum = 0;
-           int numPixels = 0;
-           int pixelX =0;
-           int pixelY=0;
+           int RedSum = 0;
+           int GreenSum = 0;
+           int BlueSum = 0;
+           int AlphaSum = 0;
+           int NumPixels = 0;
+           int PixelX =0;
+           int PixelY=0;
 
            // 4. Iterate through a neighborhood of pixels centered around the current pixel
-           for (int dy = -blurSize; dy <= blurSize; dy++)
+           for (int dy = -BlurSize; dy <= BlurSize; dy++)
            {
-               for (int dx = -blurSize; dx <= blurSize; dx++) 
+               for (int dx = -BlurSize; dx <= BlurSize; dx++) 
                {
                    // 5. Calculate the X and Y coordinates of the neighboring pixel
-                    pixelX = x + dx;
-                    pixelY = y + dy;
+                    PixelX = x + dx;
+                    PixelY = y + dy;
 
                    // 6. Check if the neighboring pixel is within the image boundaries
-                   if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) 
+                   if (PixelX >= 0 && PixelX < width && PixelY >= 0 && PixelY < height) 
                    {
                       // 7. Calculate the index of the neighboring pixel in the image vector
-                      int index = (pixelY * width + pixelX) * channelCount;
+                      int index = (PixelY * width + PixelX) * ChannelCount;
 
                       // 8. Accumulate the color channel values for the neighboring pixel
-                      redSum += image[index];
-                      greenSum += image[index + 1];
-                      blueSum += image[index + 2];
-                      if (channelCount == 4)
+                      RedSum += image[index];
+                      GreenSum += image[index + 1];
+                      BlueSum += image[index + 2];
+                      if (ChannelCount == 4)
                       {
-                       alphaSum += image[index + 3];
+                       AlphaSum += image[index + 3];
                       }
-                      // 9. Increment the count of pixels in the neighborhoo
-                      numPixels++;
+                      // 9. Increment the count of pixels in the neighborhood
+                      NumPixels++;
                    }
                }
            }
            // 10. Calculate the new color values for the current pixel based on the average
-           int pixelIndex = (y * width + x) * channelCount;
+           int PixelIndex = (y * width + x) * ChannelCount;
 
            // Update the pixel with the averaged color values
-           if (numPixels > 0) {
-               image[pixelIndex] = static_cast<uint8_t>(redSum / numPixels);
-               image[pixelIndex + 1] = static_cast<uint8_t>(greenSum / numPixels);
-               image[pixelIndex + 2] = static_cast<uint8_t>(blueSum / numPixels);
-               if (channelCount == 4)
+           if (NumPixels > 0) {
+               image[PixelIndex] = static_cast<uint8_t>(RedSum / NumPixels);
+               image[PixelIndex + 1] = static_cast<uint8_t>(GreenSum / NumPixels);
+               image[PixelIndex + 2] = static_cast<uint8_t>(BlueSum / NumPixels);
+               if (ChannelCount == 4)
                {
-                  image[pixelIndex + 3] = static_cast<uint8_t>(alphaSum / numPixels);
+                  image[PixelIndex + 3] = static_cast<uint8_t>(AlphaSum / NumPixels);
                }
            }
        }
    }
 }
+
+

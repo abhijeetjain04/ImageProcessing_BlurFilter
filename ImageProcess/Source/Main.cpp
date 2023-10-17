@@ -2,11 +2,11 @@
 
 int main(int, const char* [])
 {
-	Model::ImageProcessingModel model;
-	View::ImageProcessingView ui;
+	Model::ImageProcessingModel Model;
+	View::ImageProcessingView UI;
 
 	//Create controller object 
-	Controller::ImageProcessingController controller(&ui, &model);
+	Controller::ImageProcessingController controller(&UI, &Model);
 
 	// Run the application using start application function 
 	while (controller.StartApplication() == false)

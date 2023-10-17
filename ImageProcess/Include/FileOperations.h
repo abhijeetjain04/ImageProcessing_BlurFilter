@@ -26,11 +26,12 @@ namespace FileOperations
 	class FileOperations
 	{
 	public:
+		void SanitizePath(std::string& filepath);
 		bool DoesFileExist(std::string_view filepath);
 		bool IsValidFilePath(std::string& filepath);
 		bool IsValidFolderPath(std::string& folderepath);
 		bool IsTGAFile(std::string_view filepath);
-		std::string GetCompleteFilename(const std::string& filepath);
+		std::string GetFilenameWithExtension(const std::string& filepath);
 		std::string GetDirectoryPath(const std::string& filepath);
 	};
 

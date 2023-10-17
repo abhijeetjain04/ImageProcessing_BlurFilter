@@ -1,10 +1,6 @@
 #include "ImageProcessingController.h"
 #include <optional>
-#include <string>
-#include <string_view>
 #include <sstream>
-#include <fstream>
-
 
 bool Controller::ImageProcessingController::StartApplication()
 {
@@ -49,69 +45,73 @@ void Controller::ImageProcessingController::PrintFinalMessage()
 
 void Controller::ImageProcessingController::QuitApplication()
 {
-    m_pUI->PrintOnScreen("Quitting!");
     exit(3);
 }
 
 void Controller::ImageProcessingController::ProcessTGAImage()
 {
-    std::string inputFilePath, outputFileDir;
-    float blurFactor = 0.0;
-    bool validInput = false;
+    std::string InputFilePath, OutputFileDirectory;
+    float BlurFactor = 0.0;
+    bool ValidInput = false;
     
     m_pUI->PrintOnScreen("Please enter the full path of the TGA file");
-    m_pUI->GetInputString(inputFilePath);
-
-    while (!m_FileOper.IsValidFilePath(inputFilePath) || !m_FileOper.IsTGAFile(inputFilePath))
+    m_pUI->FormattedFilePath(InputFilePath);
+    while (!m_FileOper.IsValidFilePath(InputFilePath) || !m_FileOper.IsTGAFile(InputFilePath))
     {
         m_pUI->PrintOnScreen("Invalid input.Please enter the correct path again");
-        m_pUI->GetInputString(inputFilePath);
+        m_pUI->FormattedFilePath(InputFilePath);
     }
 
-    while (!validInput)
+    m_pUI->PrintEmptyLine();
+
+    while (!ValidInput)
     {
         std::string userInput;
 
         m_pUI->PrintOnScreen("Please enter a float between 0.0 and 1.0");
-        m_pUI->GetInputString(userInput);
+        m_pUI->FormattedFilePath(userInput);
 
         // Create a stringstream to attempt conversion
         std::istringstream input_stream(userInput);
 
         // Try to extract a float from the stringstream
-        if (input_stream >> blurFactor) {
+        if (input_stream >> BlurFactor) {
             // Check if the float is within the desired range
-            if (blurFactor >= 0.0 && blurFactor <= 1.0) {
-                validInput = true;
+            if (BlurFactor >= 0.0 && BlurFactor <= 1.0) {
+                ValidInput = true;
             }
             else {
                 m_pUI->PrintOnScreen("Invalid input. Please enter a valid float between 0.0 and 1.0.");
             }
         }
         else {
-            m_pUI->PrintOnScreen("Invalid input.");
+            m_pUI->PrintOnScreen("Invalid input format. Please enter a valid float between 0.0 and 1.0.");
         }
 
     }
 
-    m_pUI->PrintOnScreen("Please enter the full path of destination folder");
-    m_pUI->GetInputString(outputFileDir);
+    m_pUI->PrintEmptyLine();
 
-    while (!m_FileOper.IsValidFolderPath(outputFileDir))
+    m_pUI->PrintOnScreen("Please enter the full path of destination folder");
+    m_pUI->FormattedFilePath(OutputFileDirectory);
+    m_FileOper.SanitizePath(OutputFileDirectory);
+    while (!m_FileOper.IsValidFolderPath(OutputFileDirectory))
     {
         m_pUI->PrintOnScreen("Invalid input.Please enter the correct path again");
-        m_pUI->GetInputString(outputFileDir);
+        m_pUI->FormattedFilePath(OutputFileDirectory);
     }
 
-    BlurTGAImage(inputFilePath, outputFileDir, blurFactor);
+    m_pUI->PrintEmptyLine();
+
+    BlurTGAImage(InputFilePath, OutputFileDirectory, BlurFactor);
 }
 
 void Controller::ImageProcessingController::BlurTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor)
 {
-    FileOperations::TGAFileOperation tgaFileOper;
-    FileOperations::TGAHeader tgaHeader;
-    std::string outputFileName;
-    std::vector<uint8_t> image;
+    FileOperations::TGAFileOperation TGAFileOper;
+    FileOperations::TGAHeader TGAHeader;
+    std::string OutputFileName;
+    std::vector<uint8_t> OriginalTGAImage;
 
     /*
     std::ifstream file(inputFileName.data(), std::ios::binary);
@@ -130,22 +130,23 @@ void Controller::ImageProcessingController::BlurTGAImage(std::string_view inputF
     file.read(reinterpret_cast<char*>(image.data()), image.size());
     */
 
-    auto [error, ReadOperaSuccess] = tgaFileOper.ReadTGAFile(inputFileName, image, tgaHeader);
-    if (!ReadOperaSuccess && error.has_value())
+    auto [ReadError, ReadOperaSuccess] = TGAFileOper.ReadTGAFile(inputFileName, OriginalTGAImage, TGAHeader);
+    if (!ReadOperaSuccess && ReadError.has_value())
     {
-        m_pUI->PrintOnScreen(error.value());
+        m_pUI->PrintOnScreen(ReadError.value());
         return;
     }
-    m_pModel->ApplyBlur(image, tgaHeader.width, tgaHeader.height, tgaHeader.pixel_depth, blurFactor);
-
-    auto [outerror, WriteOperaSuccess] = tgaFileOper.WriteTGAFile(inputFileName, outputFileDir, image, tgaHeader, outputFileName);
-    if (!WriteOperaSuccess && outerror.has_value())
+   
+    m_pModel->ApplyBlur(OriginalTGAImage, TGAHeader.width, TGAHeader.height, TGAHeader.pixel_depth, blurFactor);
+   
+    auto [WriteError, WriteOperaSuccess] = TGAFileOper.WriteTGAFile(inputFileName, outputFileDir, OriginalTGAImage, TGAHeader, OutputFileName);
+    if (!WriteOperaSuccess && WriteError.has_value())
     {
-        m_pUI->PrintOnScreen(outerror.value());
+        m_pUI->PrintOnScreen(WriteError.value());
         return;
     }
 
-    m_pUI->PrintOnScreen("Your processed is image at " + outputFileName);
+    m_pUI->PrintOnScreen("Your blurred image is at " + OutputFileName);
    /* std::string outputDir, outputFileName, output;
     m_FileOper.GetCompleteFilename(inputFileName.data(), outputFileName);
     m_FileOper.GetDirectoryPath(inputFileName.data(), outputDir);

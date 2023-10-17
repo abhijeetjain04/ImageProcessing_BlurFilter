@@ -19,9 +19,15 @@ void View::ImageProcessingView::ClearScreen()
 	for (int i = 0; i < 80; ++i) std::cout << std::endl;
 }
 
-void View::ImageProcessingView::GetInputString(std::string& str)
+void View::ImageProcessingView::FormattedFilePath(std::string& str)
 {
 	std::getline(std::cin >> std::ws, str);
+	str.erase(std::remove(str.begin(), str.end(), '\"'), str.end());
+}
+
+void View::ImageProcessingView::PrintEmptyLine()
+{
+	std::cout << std::endl;
 }
 
 void View::ImageProcessingView::GetInputInteger(int& inputInt)
