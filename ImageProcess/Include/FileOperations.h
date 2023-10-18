@@ -6,6 +6,34 @@
 
 namespace FileOperations
 {
+	class IFileOperation
+	{
+	public:
+		IFileOperation() = default;
+		virtual ~IFileOperation() = default;
+
+		virtual bool DoesFileExist(std::string_view filepath) = 0;
+		virtual bool IsValidFilePath(std::string& filepath) = 0;
+		virtual bool IsValidFolderPath(std::string& folderepath) = 0;
+		virtual std::string GetFilenameWithExtension(const std::string& filepath) = 0;
+		virtual std::string GetDirectoryPath(const std::string& filepath) = 0;
+	};
+
+	class FileOperations :public IFileOperation
+	{
+	public:
+		FileOperations(Log::LogSystem* logobj) :m_LogObj(logobj) {}
+		void SanitizePath(std::string& filepath);
+		bool DoesFileExist(std::string_view filepath) override;
+		bool IsValidFilePath(std::string& filepath)override;
+		bool IsValidFolderPath(std::string& folderepath)override;
+		bool IsTGAFile(std::string_view filepath);
+		std::string GetFilenameWithExtension(const std::string& filepath)override;
+		std::string GetDirectoryPath(const std::string& filepath)override;
+	private:
+		Log::LogSystem* m_LogObj;
+	};
+
 #pragma pack(push, 1)
 	struct TGAHeader 
 	{
@@ -23,21 +51,6 @@ namespace FileOperations
 		uint8_t image_descriptor;
 	};
 #pragma pack(pop)
-
-	class FileOperations
-	{
-	public:
-		FileOperations(Log::LogSystem* logobj) :m_LogObj(logobj) {}
-		void SanitizePath(std::string& filepath);
-		bool DoesFileExist(std::string_view filepath);
-		bool IsValidFilePath(std::string& filepath);
-		bool IsValidFolderPath(std::string& folderepath);
-		bool IsTGAFile(std::string_view filepath);
-		std::string GetFilenameWithExtension(const std::string& filepath);
-		std::string GetDirectoryPath(const std::string& filepath);
-	private:
-		Log::LogSystem* m_LogObj;
-	};
 
 	class TGAFileOperation:public FileOperations
 	{

@@ -214,7 +214,7 @@ void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int wid
 }
 */
 
-void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)
+void Model::ImageProcessingModel::ApplyBoxBlurfilter(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)
 {
     m_LogObj->LogMessage(Log::LogLevel::INFO, "Applying blur");
     //Applying simple box blur

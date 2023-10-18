@@ -17,7 +17,6 @@ bool FileOperations::FileOperations::IsValidFilePath(std::string& filepath)
 {
     if (DoesFileExist(filepath))
     {
-        m_LogObj->LogMessage(Log::LogLevel::INFO, "Valid path found");
         std::replace(filepath.begin(), filepath.end(), '\\', '/');
         return true;
     }
@@ -60,6 +59,7 @@ std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::Re
     std::string ReadError;
     std::ifstream File(filename.data(), std::ios::in | std::ios::binary);
     if (!File.is_open()) {
+        m_LogObj->LogMessage(Log::LogLevel::ERROR, "Unable to open the TGA file");
         ReadError =  "[Error]->Failed to open input file.";
         return { ReadError, false };
     }
@@ -67,6 +67,7 @@ std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::Re
     File.read(reinterpret_cast<char*>(&header), sizeof(TGAHeader));
 
     if (header.image_type != 2) {
+        m_LogObj->LogMessage(Log::LogLevel::ERROR, "Unsupported TGA image type");
         ReadError = "[Error]->Unsupported TGA image type. Please convert your file in uncompressed true-color image format";
         return { ReadError, false };
     }
@@ -110,6 +111,7 @@ std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::Wr
 
     std::ofstream File(outputFileName, std::ios::out | std::ios::binary);
     if (!File.is_open()) {
+        m_LogObj->LogMessage(Log::LogLevel::ERROR, "Failed to create processed image");
         WriteError = "[Error]->Failed to create blurred image on the given location.";
        return { WriteError, false };
     }

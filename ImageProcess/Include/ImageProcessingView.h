@@ -6,23 +6,20 @@
 
 namespace View
 {
-	class IImageProcessingView
+	class IView
 	{
 	public:
-		IImageProcessingView() = default;
-		virtual ~IImageProcessingView() = default;
+		IView() = default;
+		virtual ~IView() = default;
 
 		virtual void PrintOnScreen(std::string_view str) = 0;
 		virtual void FormattedFilePath(std::string& str) = 0;
 	};
 
 	//UI implementation of console application    
-	class ImageProcessingView : public IImageProcessingView
+	class ImageProcessingView : public IView
 	{
 	public:
-		ImageProcessingView() = default;
-		~ImageProcessingView() = default;
-
 		void PrintOnScreen(std::string_view str)override;
 		void FormattedFilePath(std::string& str)override;
 		void PrintEmptyLine();

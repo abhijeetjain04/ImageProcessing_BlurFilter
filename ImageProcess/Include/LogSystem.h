@@ -33,7 +33,7 @@ namespace Log
             }
             return "UNKNOWN";
         }
-        std::ofstream logFile;
+        std::ofstream m_LogFile;
         View::ImageProcessingView* m_pUI;
     };
 

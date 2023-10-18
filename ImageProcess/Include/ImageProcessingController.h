@@ -7,11 +7,23 @@
 
 namespace Controller
 {
-    enum UserInputType {
-        BlurTGAImage = 1, QuitApplication
+    class IController
+    {
+    public:
+        IController() = default;
+        virtual ~IController() = default;
+
+        virtual bool StartApplication() =0;
+        virtual void PrintStartMessage() = 0;
+        virtual void PrintFinalMessage() = 0;
+        virtual void QuitApplication() = 0;
     };
 
-	class ImageProcessingController
+    enum UserInputType {
+        ApplyBlurfilterToTGAImage = 1, QuitApplication
+    };
+
+	class ImageProcessingController:public IController
 	{
     public:
         ImageProcessingController(View::ImageProcessingView* ui, Model::ImageProcessingModel* model, Log::LogSystem* logobj)
@@ -19,15 +31,15 @@ namespace Controller
         {
         }
 
-        bool StartApplication();
+        bool StartApplication() override;
 
     private:
-        void PrintStartMessage();
-        void PrintFinalMessage();
-        void QuitApplication();
+        void PrintStartMessage()override;
+        void PrintFinalMessage()override;
+        void QuitApplication()override;
 
-        void ProcessTGAImage();
-        void BlurTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor);
+        void ApplyBlurfilterTGAImage();
+        void ProcessTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor);
         View::ImageProcessingView* m_pUI;
         Model::ImageProcessingModel* m_pModel;
         Log::LogSystem* m_LogObj;

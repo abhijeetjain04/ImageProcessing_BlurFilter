@@ -11,8 +11,8 @@ bool Controller::ImageProcessingController::StartApplication()
 
     switch (UserInput)
     {
-    case UserInputType::BlurTGAImage:
-        ProcessTGAImage();
+    case UserInputType::ApplyBlurfilterToTGAImage:
+        ApplyBlurfilterTGAImage();
         break;
  
     case UserInputType::QuitApplication:
@@ -35,9 +35,9 @@ bool Controller::ImageProcessingController::StartApplication()
 void Controller::ImageProcessingController::PrintStartMessage()
 {
     m_pUI->ClearScreen();
-    m_pUI->PrintOnScreen("Please select an option:");
-    m_pUI->PrintOnScreen("1. Blur TGA Image");
-    m_pUI->PrintOnScreen("2. Quit");
+    m_pUI->PrintOnScreen("Please enter number written in front of option to select the option:");
+    m_pUI->PrintOnScreen("(1). Apply blur filter to TGA image");
+    m_pUI->PrintOnScreen("(2). Quit application");
 }
 
 void Controller::ImageProcessingController::PrintFinalMessage()
@@ -51,9 +51,10 @@ void Controller::ImageProcessingController::QuitApplication()
     m_pUI->PrintOnScreen("Quitting.....");
 }
 
-void Controller::ImageProcessingController::ProcessTGAImage()
+void Controller::ImageProcessingController::ApplyBlurfilterTGAImage()
 {
-    m_LogObj->LogMessage(Log::LogLevel::INFO, "Process TGA Image");
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Blur TGA image fuction selected");
+
     std::string InputFilePath, OutputFileDirectory;
     float BlurFactor = 0.0;
     bool ValidInput = false;
@@ -89,7 +90,7 @@ void Controller::ImageProcessingController::ProcessTGAImage()
             }
         }
         else {
-            m_pUI->PrintOnScreen("Invalid input format. Please enter a valid float between 0.0 and 1.0.");
+            m_pUI->PrintOnScreen("Invalid file format. Please enter a valid float between 0.0 and 1.0.");
         }
 
     }
@@ -107,11 +108,12 @@ void Controller::ImageProcessingController::ProcessTGAImage()
 
     m_pUI->PrintEmptyLine();
 
-    BlurTGAImage(InputFilePath, OutputFileDirectory, BlurFactor);
+    ProcessTGAImage(InputFilePath, OutputFileDirectory, BlurFactor);
 }
 
-void Controller::ImageProcessingController::BlurTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor)
+void Controller::ImageProcessingController::ProcessTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor)
 {
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "User has entered all the required input.");
     FileOperations::TGAFileOperation TGAFileOper(m_LogObj);
     FileOperations::TGAHeader TGAHeader;
     std::string OutputFileName;
@@ -137,20 +139,22 @@ void Controller::ImageProcessingController::BlurTGAImage(std::string_view inputF
     auto [ReadError, ReadOperaSuccess] = TGAFileOper.ReadTGAFile(inputFileName, OriginalTGAImage, TGAHeader);
     if (!ReadOperaSuccess && ReadError.has_value())
     {
+        m_LogObj->LogMessage(Log::LogLevel::ERROR, "Error occurred while reading TGA file");
         m_pUI->PrintOnScreen(ReadError.value());
         return;
     }
    
-    m_pModel->ApplyBlur(OriginalTGAImage, TGAHeader.width, TGAHeader.height, TGAHeader.pixel_depth, blurFactor);
+    m_pModel->ApplyBoxBlurfilter(OriginalTGAImage, TGAHeader.width, TGAHeader.height, TGAHeader.pixel_depth, blurFactor);
    
     auto [WriteError, WriteOperaSuccess] = TGAFileOper.WriteTGAFile(inputFileName, outputFileDir, OriginalTGAImage, TGAHeader, OutputFileName);
     if (!WriteOperaSuccess && WriteError.has_value())
     {
+        m_LogObj->LogMessage(Log::LogLevel::ERROR, "Error occurred while writing TGA file");
         m_pUI->PrintOnScreen(WriteError.value());
         return;
     }
 
-    m_pUI->PrintOnScreen("Your blurred image is at " + OutputFileName);
+    m_pUI->PrintOnScreen("[OUTPUT]->Your blurred image is at " + OutputFileName);
    /* std::string outputDir, outputFileName, output;
     m_FileOper.GetCompleteFilename(inputFileName.data(), outputFileName);
     m_FileOper.GetDirectoryPath(inputFileName.data(), outputDir);

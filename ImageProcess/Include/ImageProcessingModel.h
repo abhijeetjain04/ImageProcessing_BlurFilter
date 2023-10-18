@@ -7,11 +7,19 @@
 
 namespace Model
 {
-    class ImageProcessingModel
+    class IModel
+    {
+    public:
+        IModel() = default;
+        virtual ~IModel() = default;
+        virtual void ApplyBoxBlurfilter(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor) =0;
+    };
+
+    class ImageProcessingModel:public IModel
     {
        public:
            ImageProcessingModel(Log::LogSystem* logobj) :m_LogObj(logobj) {}
-           void ApplyBlur(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor);
+           void ApplyBoxBlurfilter(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)override;
 
     private:
         Log::LogSystem* m_LogObj;
