@@ -9,7 +9,7 @@ int main(int, const char* [])
 
 	//Create controller object 
 	Controller::ImageProcessingController Controller(&UI, &Model, &LogObj);
-
+	Controller.PrintStartMessage();
 	// Run the application using start application function 
 	while (Controller.StartApplication() == false)
 	{

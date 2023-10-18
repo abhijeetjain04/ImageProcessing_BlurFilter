@@ -214,26 +214,27 @@ void Model::ImageProcessingModel::ApplyBlur(std::vector<uint8_t>& image, int wid
 }
 */
 
+//Applying simple box blur
 void Model::ImageProcessingModel::ApplyBoxBlurfilter(std::vector<uint8_t>& image, int width, int height, int pixelDepth, float blurFactor)
 {
-    m_LogObj->LogMessage(Log::LogLevel::INFO, "Applying blur");
-    //Applying simple box blur
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Start applying blur filter");
+
     if (blurFactor <= 0.0) {
         return;  // No blur
     }
 
-    // 1. Calculate the size of the blur based on the blur factor
+    //Calculate the size of the blur based on the blur factor
     int BlurSize = static_cast<int>(std::round(10.0 * blurFactor));
 
-    // Example code for applying blur to a 24-bit image
+    //Calculate the ChannelCount for TGA image for 24 bit it will be 3 and for 32 bit it will be 4 
     int ChannelCount = pixelDepth / 8;
-   // Apply blur effect to a 24-bit image
-       // 2. Loop through each pixel in the image
+
+   // Loop through each pixel in the image
    for (int y = 0; y < height; y++) 
    {
        for (int x = 0; x < width; x++) 
        {
-           // 3. Initialize accumulators for each color channel and the count of pixels
+           //Initialize accumulators for each color channel and the count of pixels
            int RedSum = 0;
            int GreenSum = 0;
            int BlueSum = 0;
@@ -242,42 +243,44 @@ void Model::ImageProcessingModel::ApplyBoxBlurfilter(std::vector<uint8_t>& image
            int PixelX =0;
            int PixelY=0;
 
-           // 4. Iterate through a neighborhood of pixels centered around the current pixel
+           //Iterate through a neighborhood of pixels centered around the current pixel
            for (int dy = -BlurSize; dy <= BlurSize; dy++)
            {
                for (int dx = -BlurSize; dx <= BlurSize; dx++) 
                {
-                   // 5. Calculate the X and Y coordinates of the neighboring pixel
+                   //Calculate the X and Y coordinates of the neighboring pixel
                     PixelX = x + dx;
                     PixelY = y + dy;
 
-                   // 6. Check if the neighboring pixel is within the image boundaries
+                   //Check if the neighboring pixel is within the image boundaries
                    if (PixelX >= 0 && PixelX < width && PixelY >= 0 && PixelY < height) 
                    {
-                      // 7. Calculate the index of the neighboring pixel in the image vector
+                      //Calculate the index of the neighboring pixel in the image vector
                       int index = (PixelY * width + PixelX) * ChannelCount;
 
-                      // 8. Accumulate the color channel values for the neighboring pixel
+                      //Accumulate the color channel values for the neighboring pixel
                       RedSum += image[index];
                       GreenSum += image[index + 1];
                       BlueSum += image[index + 2];
+                      //Calculate alpha sum if 32 bit image
                       if (ChannelCount == 4)
                       {
                        AlphaSum += image[index + 3];
                       }
-                      // 9. Increment the count of pixels in the neighborhood
+                      //Increment the count of pixels in the neighborhood
                       NumPixels++;
                    }
                }
            }
-           // 10. Calculate the new color values for the current pixel based on the average
+           //Calculate the new color values for the current pixel based on the average
            int PixelIndex = (y * width + x) * ChannelCount;
 
-           // Update the pixel with the averaged color values
+           //Update the pixel with the averaged color values
            if (NumPixels > 0) {
                image[PixelIndex] = static_cast<uint8_t>(RedSum / NumPixels);
                image[PixelIndex + 1] = static_cast<uint8_t>(GreenSum / NumPixels);
                image[PixelIndex + 2] = static_cast<uint8_t>(BlueSum / NumPixels);
+               //Update the alpha value if image is 32 bit
                if (ChannelCount == 4)
                {
                   image[PixelIndex + 3] = static_cast<uint8_t>(AlphaSum / NumPixels);
@@ -285,6 +288,7 @@ void Model::ImageProcessingModel::ApplyBoxBlurfilter(std::vector<uint8_t>& image
            }
        }
    }
+   m_LogObj->LogMessage(Log::LogLevel::INFO, "Completed applying blur filter");
 }
 
 

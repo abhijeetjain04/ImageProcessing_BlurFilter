@@ -4,7 +4,7 @@ Log::LogSystem::LogSystem(View::ImageProcessingView* ui, const std::string& logF
 {
     m_LogFile.open(logFileName, std::ios::app);
     if (!m_LogFile.is_open()) {
-        m_pUI->PrintOnScreen("[Error]->Failed to open the log file.");
+        m_pUI->PrintOnScreen("[Error]-> Failed to open the log file.");
     }
 }
 

@@ -19,7 +19,7 @@ void View::ImageProcessingView::ClearScreen()
 	for (int i = 0; i < 80; ++i) std::cout << std::endl;
 }
 
-void View::ImageProcessingView::FormattedFilePath(std::string& str)
+void View::ImageProcessingView::GetFormattedFilePath(std::string& str)
 {
 	std::getline(std::cin >> std::ws, str);
 	str.erase(std::remove(str.begin(), str.end(), '\"'), str.end());

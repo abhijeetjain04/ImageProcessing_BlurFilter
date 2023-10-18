@@ -55,12 +55,12 @@ std::string FileOperations::FileOperations::GetDirectoryPath(const std::string& 
 
 std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::ReadTGAFile(std::string_view filename, std::vector<uint8_t>& image, TGAHeader& header)
 {
-    m_LogObj->LogMessage(Log::LogLevel::INFO, "Reading TGA file.");
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Started reading TGA file.");
     std::string ReadError;
     std::ifstream File(filename.data(), std::ios::in | std::ios::binary);
     if (!File.is_open()) {
         m_LogObj->LogMessage(Log::LogLevel::ERROR, "Unable to open the TGA file");
-        ReadError =  "[Error]->Failed to open input file.";
+        ReadError =  "[Error]-> Failed to open input file.";
         return { ReadError, false };
     }
 
@@ -68,13 +68,14 @@ std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::Re
 
     if (header.image_type != 2) {
         m_LogObj->LogMessage(Log::LogLevel::ERROR, "Unsupported TGA image type");
-        ReadError = "[Error]->Unsupported TGA image type. Please convert your file in uncompressed true-color image format";
+        ReadError = "[Error]-> Unsupported TGA image type. Please convert your file in uncompressed true-color image format";
         return { ReadError, false };
     }
 
     image.resize(header.width * header.height * (header.pixel_depth / 8));
     File.read(reinterpret_cast<char*>(image.data()), image.size());
     File.close();
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Ended reading TGA file.");
     return { " ", true};
 }
 
@@ -106,19 +107,21 @@ std::string FileOperations::TGAFileOperation::MakeUniqueFilename(const std::stri
 std::pair<std::optional<std::string>, bool> FileOperations::TGAFileOperation::WriteTGAFile(std::string_view filename, std::string_view outputFileDir,
     const std::vector<uint8_t>& image, const TGAHeader& header, std::string& outputFileName)
 {
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Started writing TGA file.");
     std::string WriteError;
     outputFileName = MakeUniqueFilename(filename.data(), outputFileDir.data());
 
     std::ofstream File(outputFileName, std::ios::out | std::ios::binary);
     if (!File.is_open()) {
         m_LogObj->LogMessage(Log::LogLevel::ERROR, "Failed to create processed image");
-        WriteError = "[Error]->Failed to create blurred image on the given location.";
+        WriteError = "[Error]-> Failed to create blurred image on the given location.";
        return { WriteError, false };
     }
 
     File.write(reinterpret_cast<const char*>(&header), sizeof(TGAHeader));
     File.write(reinterpret_cast<const char*>(image.data()), image.size());
     File.close();
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Ended writing TGA file.");
     return { " ",true };
 }
 
