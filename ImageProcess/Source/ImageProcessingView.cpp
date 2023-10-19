@@ -21,6 +21,7 @@ void View::ImageProcessingView::ClearScreen()
 
 void View::ImageProcessingView::GetFormattedFilePath(std::string& str)
 {
+	//Get the file path from user and then sanitize it 
 	std::getline(std::cin >> std::ws, str);
 	str.erase(std::remove(str.begin(), str.end(), '\"'), str.end());
 }

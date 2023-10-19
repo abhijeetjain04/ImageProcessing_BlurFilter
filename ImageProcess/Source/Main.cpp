@@ -4,7 +4,7 @@
 int main(int, const char* [])
 {
 	View::ImageProcessingView UI;
-	Log::LogSystem LogObj(&UI,"App.log");
+	Log::LogSystem LogObj(&UI,"ImageProcessApplication.log");
 	Model::ImageProcessingModel Model(&LogObj);
 
 	//Create controller object 

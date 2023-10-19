@@ -4,10 +4,8 @@
 #include "FileOperations.h"
 #include"LogSystem.h"
 
-
 namespace Controller
 {
-
     enum UserInputType {
         ApplyBlurfilterToTGAImage = 1, QuitApplication
     };

@@ -34,16 +34,18 @@ bool Controller::ImageProcessingController::StartApplication()
 
 void Controller::ImageProcessingController::PrintStartMessage()
 {
+    // Prints start message on the application start 
     m_pUI->ClearScreen();
     m_pUI->PrintOnScreen("************************************************************************");
     m_pUI->PrintOnScreen("****************** Application to apply BLUR FILTER ********************");
     m_pUI->PrintOnScreen("************************************************************************");
-    m_pUI->PrintOnScreen("## 24 bit and 32 bit uncompressed true-color TGA images are supported ##");
+    m_pUI->PrintOnScreen("#### 24 and 32 bit uncompressed true-color TGA images are supported ####");
     m_pUI->PrintEmptyLine();
 }
 
 void Controller::ImageProcessingController::PrintOptions()
 {
+    // Prints options  
     m_pUI->PrintOnScreen("Choose options (1) to start blur operations on image  or (2) to exit");
     m_pUI->PrintOnScreen("(1)-> Apply blur filter to TGA image");
     m_pUI->PrintOnScreen("(2)-> Quit application");
@@ -64,22 +66,24 @@ void Controller::ImageProcessingController::QuitApplication()
 
 void Controller::ImageProcessingController::ApplyBlurfilterTGAImage()
 {
-    m_LogObj->LogMessage(Log::LogLevel::INFO, "Blur TGA image fuction selected.");
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Apply Blur filter fuction selected.");
 
+    // Take file path from user
     std::string InputFilePath, OutputFileDirectory;
     float BlurFactor = 0.0;
     bool ValidInput = false;
     
     m_pUI->PrintOnScreen("--> Please enter the full path of the TGA file.");
     m_pUI->GetFormattedFilePath(InputFilePath);
+    //Validate the file path
     while (!m_FileOper.IsValidFilePath(InputFilePath) || !m_FileOper.IsTGAFile(InputFilePath))
     {
         m_pUI->PrintOnScreen("[ERROR]-> Invalid input.Please enter the correct path again.");
         m_pUI->GetFormattedFilePath(InputFilePath);
     }
-
     m_pUI->PrintEmptyLine();
 
+    //Read the TGA file and return error if unsupported file format is given
     auto [ReadError, ReadOperaSuccess] =
         m_TGAFileOper.ReadTGAFile(InputFilePath, m_OriginalTGAImage, m_TGAHeader);
     if (!ReadOperaSuccess && ReadError.has_value())
@@ -89,7 +93,7 @@ void Controller::ImageProcessingController::ApplyBlurfilterTGAImage()
         return;
     }
 
-
+    //Take blur factor from user
     m_pUI->PrintOnScreen("--> Please enter a value between 0.0 and 1.0.");
     m_pUI->PrintOnScreen("(0 being no blur and 1 being blurred beyond recognition)");
     while (!ValidInput)
@@ -114,9 +118,9 @@ void Controller::ImageProcessingController::ApplyBlurfilterTGAImage()
         }
 
     }
-
     m_pUI->PrintEmptyLine();
 
+    //Take destination folder path from user
     m_pUI->PrintOnScreen("-> Please enter the full path of destination folder.");
     m_pUI->GetFormattedFilePath(OutputFileDirectory);
     m_FileOper.SanitizePath(OutputFileDirectory);
@@ -128,7 +132,9 @@ void Controller::ImageProcessingController::ApplyBlurfilterTGAImage()
 
     m_pUI->PrintEmptyLine();
 
+    //Give all the information for processing 
     ProcessTGAImage(InputFilePath, OutputFileDirectory, BlurFactor);
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Successfully applied Blur filter.");
 }
 
 void Controller::ImageProcessingController::ProcessTGAImage(std::string_view inputFileName, std::string_view outputFileDir, float blurFactor)
@@ -137,9 +143,10 @@ void Controller::ImageProcessingController::ProcessTGAImage(std::string_view inp
 
     std::string OutputFileName;
 
-
+    //Give the image and blur factor to model 
     m_pModel->ApplyBoxBlurfilter(m_OriginalTGAImage, m_TGAHeader.width, m_TGAHeader.height, m_TGAHeader.pixel_depth, blurFactor);
    
+    //Write blurred TGA image in the given folder path
     auto [WriteError, WriteOperaSuccess] = 
         m_TGAFileOper.WriteTGAFile(inputFileName, outputFileDir,m_OriginalTGAImage, m_TGAHeader, OutputFileName);
     if (!WriteOperaSuccess && WriteError.has_value())
@@ -149,7 +156,7 @@ void Controller::ImageProcessingController::ProcessTGAImage(std::string_view inp
         return;
     }
 
-    m_LogObj->LogMessage(Log::LogLevel::INFO, "Ended TGA image processing");
-    m_pUI->PrintOnScreen("[OUTPUT]-> The blurred image has been successfully generated at: " + OutputFileName);
 
+    m_pUI->PrintOnScreen("[OUTPUT]-> The blurred image has been successfully generated at: " + OutputFileName);
+    m_LogObj->LogMessage(Log::LogLevel::INFO, "Ended TGA image processing");
 }
